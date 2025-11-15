@@ -1,0 +1,6 @@
+---
+- name: Test avchecker role
+  hosts: localhost
+  remote_user: root
+  roles:
+    - avchecker
