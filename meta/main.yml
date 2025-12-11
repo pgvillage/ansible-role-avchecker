@@ -1,7 +1,11 @@
 ---
 galaxy_info:
   author: S. Mannem
-  description: CTO
+  description: |
+    Avchecker is a simple tool to track availability of PostgreSQL in a cluster.
+    This role installs avchecker as a systemd service.
+    This role is part of PgVillage, which is an opinated PostgreSQL deployment for Virtual Machines.
+
   company: Nibble-IT
 
   # If the issue tracker for your role is not on github, uncomment the
