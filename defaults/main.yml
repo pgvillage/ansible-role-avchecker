@@ -16,7 +16,7 @@ avchecker_package_names: >-
   }}
 
 _avchecker_package_names:
-  default: #dnf, apt, etc.
+  default: # dnf, apt, etc.
     - python3-psycopg3
   zypper:
     - python313-psycopg2

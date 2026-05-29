@@ -1,5 +1,8 @@
 ---
 galaxy_info:
+  namespace: pgvillage
+  role_name: avchecker
+
   author: S. Mannem
   description: |
     Avchecker is a simple tool to track availability of PostgreSQL in a cluster.
