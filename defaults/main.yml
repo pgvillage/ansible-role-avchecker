@@ -6,8 +6,20 @@ avchecker_group: avchecker
 avchecker_path: /opt/avchecker
 
 avchecker_package_state: present
-avchecker_packages:
-  - python3-psycopg2
+
+avchecker_package_names: >-
+  {{
+    _avchecker_packages.get(
+      ansible_facts.pkg_mgr,
+      _avchecker_packages.default
+    )
+  }}
+
+_avchecker_package_names:
+  default: # dnf, apt, etc.
+    - python3-psycopg3
+  zypper:
+    - python313-psycopg2
 
 avchecker_defaults: {}
 # Example:
