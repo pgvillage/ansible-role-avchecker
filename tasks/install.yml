@@ -30,7 +30,7 @@
   ansible.builtin.package:
     name: "{{ item }}"
     state: "{{ avchecker_package_state }}"
-  loop: "{{ avchecker_packages }}"
+  loop: "{{ avchecker_package_names }}"
 
 - name: Install avchecker@ systemd service
   ansible.builtin.template:

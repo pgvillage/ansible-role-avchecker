@@ -9,9 +9,9 @@ avchecker_package_state: present
 
 avchecker_package_names: >-
   {{
-    _avchecker_packages.get(
+    _avchecker_package_names.get(
       ansible_facts.pkg_mgr,
-      _avchecker_packages.default
+      _avchecker_package_names.default
     )
   }}
 
