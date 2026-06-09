@@ -9,14 +9,18 @@ avchecker_package_state: present
 
 avchecker_package_names: >-
   {{
-    _avchecker_packages.get(
+    _avchecker_package_names.get(
       ansible_facts.pkg_mgr,
-      _avchecker_packages.default
+      _avchecker_package_names.default
     )
   }}
 
 _avchecker_package_names:
-  default: # dnf, apt, etc.
+  default:
+    - python3-psycopg3
+  apt:
+    - python3-psycopg
+  dnf:
     - python3-psycopg3
   zypper:
     - python313-psycopg2
