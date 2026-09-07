@@ -1,24 +1,50 @@
 ---
-- name: Create an avchecker user in Postgres
+
+- name: "Create an avchecker user in postgres"
   become: true
   become_user: "postgres"
   community.postgresql.postgresql_user:
     name: "{{ avchecker_user }}"
-    state: present
-  environment:
-    PGSERVICE: master
+  environment: '{{ item.value }}'
   run_once: true
+  loop: "{{ avchecker_defaults | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: 'item.value.PGTARGETSESSIONATTRS | default("") == "read-write"'
+
+- name: "Create the avchecker database"
+  become: true
+  become_user: "postgres"
+  community.postgresql.postgresql_db:
+    name: "{{ dbname }}"
+    owner: "{% if dbname != 'postgres' %}{{ username }}{% else %}postgres{% endif %}"
+  environment: '{{ item.value }}'
+  run_once: true
+  loop: "{{ avchecker_defaults | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  vars:
+    dbname: '{{ item.value.PGDATABASE | default(username) }}'
+    username: '{{ item.value.PGUSER | default(avchecker_user) }}'
+  when:
+    - 'item.value.PGTARGETSESSIONATTRS | default("") == "read-write"'
 
 - name: Grant permissions
   become: true
   become_user: "postgres"
   community.postgresql.postgresql_privs:
-    roles: "{{ avchecker_user }}"
-    privs: CREATE
-    type: database
-    objs: postgres
-    login_db: postgres
+    roles: "{{ username }}"
+    privs: all
+    type: schema
+    objs: public
     state: present
-  environment:
-    PGSERVICE: master
+    login_db: '{{ dbname }}'
+  environment: '{{ item.value }}'
   run_once: true
+  loop: "{{ avchecker_defaults | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  vars:
+    dbname: '{{ item.value.PGDATABASE | default(username) }}'
+    username: '{{ item.value.PGUSER | default(avchecker_user) }}'
+  when: 'item.value.PGTARGETSESSIONATTRS | default("") == "read-write"'
