@@ -10,7 +10,7 @@ Before=initrd-switch-root.target
 After=syslog.target network.target
 
 [Service]
-EnvironmentFile=-/etc/default/avchecker_%I
+EnvironmentFile=/etc/default/avchecker_%i
 ExecStart={{ avchecker_path }}/avchecker.py
 Type=simple
 User={{ avchecker_user }}
