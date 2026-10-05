@@ -13,7 +13,8 @@ None
 Role Variables
 --------------
 
-Please see [defaults](https://github.com/pgvillage/ansible-role-avchecker/blob/main/defaults/main.yml) for all variables
+Please see the [API documentation](docs/api.md) for a description of all variables.
+The defaults are defined in [defaults/main.yml](defaults/main.yml).
 
 
 Dependencies

@@ -1,12 +1,25 @@
 ---
+# defaults file for avchecker
+
+# OS user that runs the avchecker@ services. The role creates this user, and
+# it is also created as a PostgreSQL role (and the default PGUSER / PGDATABASE)
+# on instances where PGTARGETSESSIONATTRS is "read-write".
 avchecker_user: avchecker
+
+# OS group of avchecker_user. The role creates it and uses it as the primary
+# group of avchecker_user and as the group of the systemd services.
 avchecker_group: avchecker
 
-# defaults file for avchecker
+# Directory where the avchecker.py script is installed.
 avchecker_path: /opt/avchecker
 
+# State passed to ansible.builtin.package for the prerequisite packages
+# (e.g. present, latest).
 avchecker_package_state: present
 
+# List of prerequisite packages to install. Defaults to the entry in
+# _avchecker_package_names that matches the package manager of the host
+# (ansible_facts.pkg_mgr), or the "default" entry if none matches.
 avchecker_package_names: >-
   {{
     _avchecker_package_names.get(
@@ -15,6 +28,8 @@ avchecker_package_names: >-
     )
   }}
 
+# Internal: mapping of package manager to the PostgreSQL Python driver
+# package(s) needed by avchecker. Override avchecker_package_names instead.
 _avchecker_package_names:
   default:
     - python3-psycopg3
@@ -25,24 +40,53 @@ _avchecker_package_names:
   zypper:
     - python313-psycopg2
 
-avchecker_defaults: {}
+# Dictionary of avchecker instances. Each key is an instance name and creates
+# an avchecker@<key> systemd service with its environment written to
+# /etc/default/avchecker_<key>. Each value is a dictionary of environment
+# variables (key is uppercased and '-' replaced by '_'), typically libpq
+# variables (PGHOST, PGPORT, PGUSER, PGDATABASE, PGTARGETSESSIONATTRS, ...)
+# and AVCHECKER_SLEEPTIME (seconds between checks, default 5).
+# Instances with PGTARGETSESSIONATTRS: read-write are also used to create the
+# PostgreSQL user, database and privileges.
+# When empty (the default) the role does nothing.
 # Example:
 # avchecker_defaults:
 #   "5432":
 #     PGHOST: /tmp
 #     PGPORT: 5432
+#     PGTARGETSESSIONATTRS: read-write
+avchecker_defaults: {}
 
+# Whether the role deploys TLS certificates (avchecker_cert_folders and
+# avchecker_cert_files) for client certificate authentication to PostgreSQL.
 avchecker_certs_managed: false
+
+# Dictionary of directories to create for certificates (mode 0700) when
+# avchecker_certs_managed is true. Each value needs path, owner and group.
+# Defaults to ~/.postgresql/ of avchecker_user, where libpq looks by default.
 avchecker_cert_folders:
   postgres:
     path: "{{ getent_passwd[avchecker_user][4] }}/.postgresql/"
     owner: "{{ avchecker_user }}"
     group: "{{ avchecker_group }}"
 
+# PEM contents of the CA (chain) used to verify the PostgreSQL server
+# certificate. Written to root.crt. Replace the placeholder when
+# avchecker_certs_managed is true.
 avchecker_root_cert: "---- CERT ----"
+
+# PEM contents of the client certificate of avchecker_user. Written to
+# postgresql.crt. Replace the placeholder when avchecker_certs_managed is true.
 avchecker_client_cert: "---- CERT ----"
+
+# PEM contents of the private key of the client certificate. Written to
+# postgresql.key. Replace the placeholder when avchecker_certs_managed is true;
+# consider storing it in Ansible Vault.
 avchecker_client_key: "---- CERT ----"
 
+# Dictionary of certificate files to deploy (mode 0600) when
+# avchecker_certs_managed is true. Each value needs path, body (file contents),
+# owner and group. Changes restart the avchecker@ services.
 avchecker_cert_files:
   postgres_server_chain:
     path: "{{ avchecker_cert_folders.postgres.path }}/root.crt"
