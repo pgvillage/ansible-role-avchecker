@@ -114,16 +114,22 @@ key the role:
 - writes the environment file `/etc/default/avchecker_<key>`
 - enables and starts the `avchecker@<key>` systemd service
 
-Each value is a dictionary of environment variables. Keys are uppercased and
-`-` is replaced by `_`. Common variables:
+Each value is a dictionary of environment variables. When writing the service
+environment file, keys are uppercased and `-` is replaced by `_`. PostgreSQL
+provisioning uses the original keys, so use exact uppercase libpq names such as
+`PGTARGETSESSIONATTRS`, `PGUSER` and `PGDATABASE`. Common variables:
 
 | Variable               | Description                                                            |
 |------------------------|------------------------------------------------------------------------|
 | `PGHOST`, `PGPORT`     | libpq connection settings                                              |
 | `PGUSER`               | Connection user. Defaults to `avchecker_user` for database creation     |
-| `PGDATABASE`           | Database to use. Defaults to the user name for database creation       |
+| `PGDATABASE`           | Database to use. Defaults to `PGUSER` for database creation       |
 | `PGTARGETSESSIONATTRS` | When `read-write`, this instance is also used to create the PostgreSQL user, database and privileges |
 | `AVCHECKER_SLEEPTIME`  | Seconds between checks (default `5`)                                   |
+
+For `read-write` instances, the role creates the PostgreSQL role named
+`avchecker_user`. A different `PGUSER` must already exist; it is used for
+database ownership (except for the `postgres` database) and schema grants.
 
 Any other libpq environment variable (for example `PGSSLMODE`) can be set too.
 
