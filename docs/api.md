@@ -123,13 +123,18 @@ provisioning uses the original keys, so use exact uppercase libpq names such as
 |------------------------|------------------------------------------------------------------------|
 | `PGHOST`, `PGPORT`     | libpq connection settings                                              |
 | `PGUSER`               | Connection user. Defaults to `avchecker_user` for database creation     |
-| `PGDATABASE`           | Database to use. Defaults to `PGUSER` for database creation       |
+| `PGDATABASE`           | Database to use. Defaults to `${PGUSER}` for database creation       |
 | `PGTARGETSESSIONATTRS` | When `read-write`, this instance is also used to create the PostgreSQL user, database and privileges |
 | `AVCHECKER_SLEEPTIME`  | Seconds between checks (default `5`)                                   |
 
-For `read-write` instances, the role creates the PostgreSQL role named
-`avchecker_user`. A different `PGUSER` must already exist; it is used for
-database ownership (except for the `postgres` database) and schema grants.
+For `read-write` instances, the role creates the PostgreSQL user named `avchecker_user`.
+
+This role creates all required users. The exact user(s) depend on the following:
+
+- For each instance where PGUSER is set, that user is created and granted permissions as required.
+- When PGUSER is not set, the role defaults to the setting for avchecker_user which defaults to the value avchecker.
+
+The user will own the database (unless the postgres database is used) and have schema grants as required for avchecker to function properly.
 
 Any other libpq environment variable (for example `PGSSLMODE`) can be set too.
 
