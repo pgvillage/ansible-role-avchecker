@@ -36,9 +36,9 @@ The role only does something when `avchecker_defaults` has at least one entry.
 | string | `avchecker` |
 
 OS user that runs the `avchecker@` services. The role creates this user.
-It is also created as a PostgreSQL role on instances where
-`PGTARGETSESSIONATTRS` is `read-write`, and it is the default for `PGUSER` and
-`PGDATABASE` when those are not set for an instance.
+It is also the default for `PGUSER` and `PGDATABASE` when those are not set for
+an instance, in which case it is created as a PostgreSQL role on instances where
+`PGTARGETSESSIONATTRS` is `read-write`.
 
 ### avchecker_group
 
@@ -127,12 +127,13 @@ provisioning uses the original keys, so use exact uppercase libpq names such as
 | `PGTARGETSESSIONATTRS` | When `read-write`, this instance is also used to create the PostgreSQL user, database and privileges |
 | `AVCHECKER_SLEEPTIME`  | Seconds between checks (default `5`)                                   |
 
-For `read-write` instances, the role creates the PostgreSQL user named `avchecker_user`.
+For each `read-write` instance, the role creates the PostgreSQL user if it does
+not exist yet:
 
-This role creates all required users. The exact user(s) depend on the following:
+- When `PGUSER` is set, that user is created and granted permissions as required.
+- When `PGUSER` is not set, the role uses `avchecker_user` (default `avchecker`).
 
-- For each instance where PGUSER is set, that user is created and granted permissions as required.
-- When PGUSER is not set, the role defaults to the setting for avchecker_user which defaults to the value avchecker.
+Existing users are left as they are, apart from the grants below.
 
 The user will own the database (unless the postgres database is used) and have schema grants as required for avchecker to function properly.
 
