@@ -1,10 +1,10 @@
 ---
 
-- name: "Create an avchecker user in postgres"
+- name: "Create the avchecker user(s) in postgres"
   become: true
   become_user: "postgres"
   community.postgresql.postgresql_user:
-    name: "{{ avchecker_user }}"
+    name: "{{ item.value.PGUSER | default(avchecker_user) }}"
   environment: '{{ item.value }}'
   run_once: true
   loop: "{{ avchecker_defaults | dict2items }}"
