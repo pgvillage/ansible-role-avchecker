@@ -1,0 +1,22 @@
+---
+# avchecker needs a PostgreSQL server to connect to. The smallest real setup is
+# the PostgreSQL server from the distribution, with its default local peer
+# authentication: the role creates the avchecker role and database in it.
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Install the PostgreSQL server
+      ansible.builtin.dnf:
+        name: postgresql-server
+        state: present
+
+    - name: Initialize the PostgreSQL data directory
+      ansible.builtin.command: postgresql-setup --initdb
+      args:
+        creates: /var/lib/pgsql/data/PG_VERSION
+
+    - name: Start PostgreSQL
+      ansible.builtin.systemd:
+        name: postgresql
+        state: started
+        enabled: true
