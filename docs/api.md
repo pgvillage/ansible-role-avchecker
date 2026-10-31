@@ -91,11 +91,11 @@ package(s) avchecker needs. To change the packages, override
 ```yaml
 _avchecker_package_names:
   default:
-    - python3-psycopg3
+    - python3-psycopg2
   apt:
-    - python3-psycopg
+    - python3-psycopg2
   dnf:
-    - python3-psycopg3
+    - python3-psycopg2
   zypper:
     - python313-psycopg2
 ```

@@ -1,0 +1,57 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Read the service states
+      ansible.builtin.service_facts:
+
+    - name: Check that the avchecker instance runs
+      ansible.builtin.assert:
+        that: ansible_facts.services['avchecker@local.service'].state == 'running'
+
+    # service_facts does not report the enabled state of template instances
+    - name: Check that the avchecker instance is enabled
+      ansible.builtin.systemd:
+        name: avchecker@local.service
+        enabled: true
+      check_mode: true
+      register: enabled
+      failed_when: enabled is changed
+
+    - name: Read the environment file of the instance
+      ansible.builtin.slurp:
+        src: /etc/default/avchecker_local
+      register: env_file
+
+    - name: Check the environment file
+      ansible.builtin.assert:
+        that:
+          - "'PGHOST=/var/run/postgresql' in content"
+          - "'PGTARGETSESSIONATTRS=read-write' in content"
+          - "'AVCHECKER_SLEEPTIME=1' in content"
+      vars:
+        content: "{{ env_file.content | b64decode }}"
+
+    # avchecker creates public.avchecker and updates its timestamp every
+    # AVCHECKER_SLEEPTIME seconds, as the avchecker user in the avchecker database
+    - name: Wait until avchecker has updated its timestamp in the last few seconds
+      become: true
+      become_user: postgres
+      ansible.builtin.command: >-
+        psql -d avchecker -Atc
+        "select count(*) from public.avchecker where last > now() - interval '5 seconds'"
+      register: recent
+      until: recent.rc == 0 and recent.stdout == '1'
+      retries: 15
+      delay: 2
+      changed_when: false
+
+    - name: Check that the table is owned by the avchecker user
+      become: true
+      become_user: postgres
+      ansible.builtin.command: >-
+        psql -d avchecker -Atc
+        "select tableowner from pg_tables where schemaname = 'public' and tablename = 'avchecker'"
+      register: owner
+      changed_when: false
+      failed_when: owner.stdout != 'avchecker'

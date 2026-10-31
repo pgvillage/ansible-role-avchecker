@@ -1,0 +1,16 @@
+---
+- name: Converge
+  hosts: all
+  # The role creates the PostgreSQL role and database with run_once, as all
+  # hosts of a cluster share one database. Here each host has its own
+  # PostgreSQL server, so converge the hosts one at a time.
+  serial: 1
+  vars:
+    avchecker_defaults:
+      local:
+        PGHOST: /var/run/postgresql
+        PGPORT: 5432
+        PGTARGETSESSIONATTRS: read-write
+        AVCHECKER_SLEEPTIME: 1
+  roles:
+    - role: pgvillage.avchecker
