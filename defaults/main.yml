@@ -17,9 +17,10 @@ avchecker_path: /opt/avchecker
 # (e.g. present, latest).
 avchecker_package_state: present
 
-# List of prerequisite packages to install. Defaults to the entry in
-# _avchecker_package_names that matches the package manager of the host
-# (ansible_facts.pkg_mgr), or the "default" entry if none matches.
+# List of prerequisite packages to install. Built from
+# _avchecker_package_names in vars/main.yml: the entry that matches the
+# package manager of the host (ansible_facts.pkg_mgr), or the "default" entry
+# if none matches.
 avchecker_package_names: >-
   {{
     _avchecker_package_names.get(
@@ -27,18 +28,6 @@ avchecker_package_names: >-
       _avchecker_package_names.default
     )
   }}
-
-# Internal: mapping of package manager to the PostgreSQL Python driver
-# package(s) needed by avchecker. Override avchecker_package_names instead.
-_avchecker_package_names:
-  default:
-    - python3-psycopg2
-  apt:
-    - python3-psycopg2
-  dnf:
-    - python3-psycopg2
-  zypper:
-    - python313-psycopg2
 
 # Dictionary of avchecker instances. Each key is an instance name and creates
 # an avchecker@<key> systemd service with its environment written to

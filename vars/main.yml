@@ -1,2 +1,15 @@
 ---
 # vars file for avchecker
+
+# Internal: mapping of package manager to the PostgreSQL Python driver
+# package(s) needed by avchecker. Role variable, so an inventory can't
+# override it: set avchecker_package_names instead.
+_avchecker_package_names:
+  default:
+    - python3-psycopg2
+  apt:
+    - python3-psycopg2
+  dnf:
+    - python3-psycopg2
+  zypper:
+    - python313-psycopg2
