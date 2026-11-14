@@ -75,7 +75,7 @@ example `present` or `latest`.
 | list | Taken from `_avchecker_package_names` based on the package manager |
 
 List of prerequisite packages to install. By default it is the entry in
-`_avchecker_package_names` that matches the host's package manager
+`_avchecker_package_names` (in `vars/main.yml`) that matches the host's package manager
 (`ansible_facts.pkg_mgr`), or the `default` entry if none matches.
 
 ### _avchecker_package_names
@@ -84,9 +84,10 @@ List of prerequisite packages to install. By default it is the entry in
 |------------|---------|
 | dictionary | See below |
 
-Internal. Maps each package manager to the PostgreSQL Python driver
-package(s) avchecker needs. To change the packages, override
-`avchecker_package_names` instead.
+Internal, defined in `vars/main.yml`. Maps each package manager to the
+PostgreSQL Python driver package(s) avchecker needs. As a role variable it
+takes precedence over the inventory, so it can't be overridden there: to
+change the packages, set `avchecker_package_names` instead.
 
 ```yaml
 _avchecker_package_names:
